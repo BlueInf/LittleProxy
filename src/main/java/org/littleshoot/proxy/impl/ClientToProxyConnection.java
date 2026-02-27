@@ -159,6 +159,11 @@ public class ClientToProxyConnection extends ProxyConnection<HttpRequest> {
                 }
               });
     }
+
+    if (isAcceptProxyProtocol()) {
+      pipeline.addFirst(HTTP_PROXY_DECODER_NAME, new HAProxyMessageDecoder());
+    }
+
     this.globalTrafficShapingHandler = globalTrafficShapingHandler;
 
     LOG.debug("Created ClientToProxyConnection");
@@ -825,9 +830,6 @@ public class ClientToProxyConnection extends ProxyConnection<HttpRequest> {
     pipeline.addLast("bytesWrittenMonitor", bytesWrittenMonitor);
 
     pipeline.addLast(HTTP_ENCODER_NAME, new HttpResponseEncoder());
-    if (isAcceptProxyProtocol()) {
-      pipeline.addLast(HTTP_PROXY_DECODER_NAME, new HAProxyMessageDecoder());
-    }
     // We want to allow longer request lines, headers, and chunks
     // respectively.
     pipeline.addLast(
